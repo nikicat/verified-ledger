@@ -129,10 +129,13 @@ maintenance.
 
 ## Upstream
 
-`upstream/` holds the minimized repros and the write-ups filed against hax
-from this work: the three issues above, plus a proposal for a CI lane that
-must *discharge* extracted contracts instead of snapshotting extraction
-output.
+`upstream/` holds the minimized repros behind the reports this work filed
+against hax: [#2120](https://github.com/cryspen/hax/issues/2120) and
+[#2121](https://github.com/cryspen/hax/issues/2121) (repro crates here),
+[#2127](https://github.com/cryspen/hax/issues/2127), and
+[#2122](https://github.com/cryspen/hax/issues/2122) — a proposal for a CI
+lane that must *discharge* extracted contracts instead of snapshotting
+extraction output.
 
 ## License
 

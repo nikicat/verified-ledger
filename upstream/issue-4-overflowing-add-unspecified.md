@@ -75,23 +75,3 @@ let overflowing_add_u64 (x y: u64): u64 & bool
 ```
 
 We applied exactly this locally and both lemmas above discharge.
-
-## Why it matters to us
-
-We verify a small contract-bearing crate (a token ledger: conservation of
-supply, atomicity on failure, panic-freedom) end to end with the F\* backend.
-Against `984ca92e` unpatched, the split is exactly along this line:
-
-| operation | primitive used | result |
-| --- | --- | --- |
-| `burn` | `checked_sub` | verifies |
-| `mint` | `checked_add` | fails |
-| `transfer` | both | fails |
-
-(F\* aborts a module at the first error, so `mint`'s failure masks
-`transfer`'s; removing `mint` surfaces it.)
-
-With the five-line definition above in place, the entire crate verifies with
-**no post-extraction patching at all** — the local `checked_add`/`checked_sub`
-helper module and call-site rewrite we have been carrying since #2120 can be
-deleted outright.

@@ -1,0 +1,69 @@
+name: verify
+
+# Runs the real claim of this repo: extract src/lib.rs with hax and let F*/Z3
+# discharge every contract. The hax toolchain is built from the pinned
+# revision (~30 min) and cached under that revision, so only the first run
+# on a new pin pays for it.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+env:
+  HAX_REV: 54c3496793f782df72e258785b58acf35feee91f
+  FSTAR_VERSION: v2025.10.06
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: cryspen/hax
+          ref: ${{ env.HAX_REV }}
+          path: hax
+
+      - name: Install F* + Z3
+        run: |
+          mkdir -p ~/.local/opt
+          curl -sSfL "https://github.com/FStarLang/FStar/releases/download/$FSTAR_VERSION/fstar-$FSTAR_VERSION-Linux-x86_64.tar.gz" \
+            | tar -xz -C ~/.local/opt
+          ~/.local/opt/fstar/bin/fstar.exe --version
+
+      - name: Cache the hax toolchain
+        id: hax-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.opam
+            ~/.cargo/bin
+            ~/.rustup
+          key: hax-${{ runner.os }}-${{ env.HAX_REV }}
+
+      - name: Install hax (cargo-hax + driver + OCaml engine)
+        if: steps.hax-cache.outputs.cache-hit != 'true'
+        run: |
+          sudo apt-get update && sudo apt-get install -y opam nodejs jq
+          opam init --bare -y
+          opam switch create -y 5.1.1
+          cd hax && ./setup.sh --no-aeneas
+        env:
+          OPAMERRLOGLEN: 0
+
+      # opam's own binary is apt-installed, so it is missing on a cache hit
+      # even though the switch it manages was restored.
+      - name: Install opam (cache hit)
+        if: steps.hax-cache.outputs.cache-hit == 'true'
+        run: sudo apt-get update && sudo apt-get install -y opam
+
+      - name: Verify
+        run: |
+          eval "$(opam env)"
+          HAX_HOME="$PWD/hax" FSTAR_BIN="$HOME/.local/opt/fstar/bin" ./verify.sh
+
+      - name: Extraction is in sync with src/lib.rs
+        run: git diff --exit-code -- proofs/fstar/extraction

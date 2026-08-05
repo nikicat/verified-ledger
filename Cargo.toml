@@ -2,6 +2,9 @@
 name = "verified-ledger"
 version = "0.1.0"
 edition = "2021"
+description = "PoC: a token ledger whose conservation contracts are machine-checked via hax + F*"
+license = "Apache-2.0"
+publish = false
 
 [dependencies]
 hax-lib = "0.3"

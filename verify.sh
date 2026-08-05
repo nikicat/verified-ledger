@@ -17,8 +17,8 @@ export PATH="$FSTAR_BIN:$HOME/.cargo/bin:$PATH"
 command -v hax-engine >/dev/null 2>&1 || eval "$(opam env)"
 cd "$(dirname "$0")"
 
-#echo "== 1/3 rust tests"
-#cargo test --quiet
+echo "== 1/3 rust tests"
+cargo test --quiet
 
 echo "== 2/3 hax: rust -> F*"
 cargo hax into fstar

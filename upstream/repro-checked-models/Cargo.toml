@@ -1,0 +1,7 @@
+[package]
+name = "repro-checked-models"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+hax-lib = { path = "/home/nb/src/hax/hax-lib" }

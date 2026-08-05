@@ -1,0 +1,5 @@
+target/
+.cache/
+*.log
+/proofs/fstar/extraction/dep.graph
+/proofs/lean/llbc/

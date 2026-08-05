@@ -3,10 +3,11 @@
 #
 #   src/lib.rs  (contracts + F* lemmas, all in the Rust source)
 #     --cargo hax into fstar-->  proofs/fstar/extraction/Verified_ledger.fst
-#     --patch_extraction.py-->   (1 toolchain-gap patch, see that file)
 #     --fstar.exe + Z3-->        all contracts discharged
 #
-# Toolchain: cargo-hax + hax-driver (cargo, git 54c34967), hax OCaml engine
+# The extraction is fed to F* verbatim: no post-processing step.
+#
+# Toolchain: cargo-hax + hax-driver (cargo, git 431b0ff4), hax OCaml engine
 # (opam, built from ~/src/hax), F* v2025.10.06 (hax's pin), proof-libs from
 # the ~/src/hax checkout. The earlier Lean/Aeneas pipeline is archived in
 # verify-lean.sh.
@@ -22,7 +23,6 @@ cargo test --quiet
 
 echo "== 2/3 hax: rust -> F*"
 cargo hax into fstar
-python3 proofs/fstar/patch_extraction.py
 
 echo "== 3/3 F* + Z3: discharge all contracts"
 HL="$HAX_HOME/proof-libs/fstar"

@@ -192,7 +192,7 @@ let mint (l: t_Ledger) (to: usize) (amount: u64)
     (t_Ledger & Core_models.Result.t_Result Prims.unit t_LedgerError)
   else
     match
-      Verified_ledger_helpers.checked_add_u64 (l.f_balances.[ to ] <: u64) amount
+      Core_models.Num.impl_u64__checked_add (l.f_balances.[ to ] <: u64) amount
       <:
       Core_models.Option.t_Option u64
     with
@@ -269,7 +269,7 @@ let burn (l: t_Ledger) (from: usize) (amount: u64)
     (t_Ledger & Core_models.Result.t_Result Prims.unit t_LedgerError)
   else
     match
-      Verified_ledger_helpers.checked_sub_u64 (l.f_balances.[ from ] <: u64) amount
+      Core_models.Num.impl_u64__checked_sub (l.f_balances.[ from ] <: u64) amount
       <:
       Core_models.Option.t_Option u64
     with
@@ -357,7 +357,7 @@ let transfer (l: t_Ledger) (from to: usize) (amount: u64)
     (t_Ledger & Core_models.Result.t_Result Prims.unit t_LedgerError)
   else
     match
-      Verified_ledger_helpers.checked_sub_u64 (l.f_balances.[ from ] <: u64) amount
+      Core_models.Num.impl_u64__checked_sub (l.f_balances.[ from ] <: u64) amount
       <:
       Core_models.Option.t_Option u64
     with
@@ -379,7 +379,7 @@ let transfer (l: t_Ledger) (from to: usize) (amount: u64)
         (t_Ledger & Core_models.Result.t_Result Prims.unit t_LedgerError)
       else
         match
-          Verified_ledger_helpers.checked_add_u64 (l.f_balances.[ to ] <: u64) amount
+          Core_models.Num.impl_u64__checked_add (l.f_balances.[ to ] <: u64) amount
           <:
           Core_models.Option.t_Option u64
         with

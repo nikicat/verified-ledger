@@ -4,6 +4,11 @@ name: verify
 # discharge every contract. The hax toolchain is built from the pinned
 # revision (~30 min) and cached under that revision, so only the first run
 # on a new pin pays for it.
+#
+# The pin is a fork branch carrying cryspen/hax#2128, which specifies the
+# `overflowing_add` primitive behind `u64::checked_add`. Without it the
+# extraction of `mint` and `transfer` is unprovable. Repoint at cryspen/hax
+# once that lands.
 
 on:
   push:
@@ -11,7 +16,8 @@ on:
   workflow_dispatch:
 
 env:
-  HAX_REV: 54c3496793f782df72e258785b58acf35feee91f
+  HAX_REPO: nikicat/hax
+  HAX_REV: 431b0ff4c8e3a246695b4a2fb33379a331beca78
   FSTAR_VERSION: v2025.10.06
 
 jobs:
@@ -23,7 +29,7 @@ jobs:
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          repository: cryspen/hax
+          repository: ${{ env.HAX_REPO }}
           ref: ${{ env.HAX_REV }}
           path: hax
 

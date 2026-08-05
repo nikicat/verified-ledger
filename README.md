@@ -62,10 +62,13 @@ src/lib.rs        plain Rust
       │ cargo hax into fstar        (rustc driver + OCaml engine)
       ▼
 proofs/fstar/extraction/Verified_ledger.fst     generated — do not edit
-      │ patch_extraction.py         (1 toolchain-gap patch, documented there)
+      │
       ▼
 fstar.exe + Z3 against hax proof-libs           ALL contracts discharged
 ```
+
+The generated F\* goes to the solver verbatim — there is no post-processing
+step between extraction and proof.
 
 Run it: `./verify.sh` (tests → extraction → F\* check, ~2 min once the
 toolchain is in place). `.github/workflows/verify.yml` is the executable
@@ -94,7 +97,8 @@ maintenance.
 
 ## Toolchain
 
-* hax @ 54c34967: `cargo-hax` + `hax-driver` (cargo, nightly-2025-11-08),
+* hax @ [431b0ff4](https://github.com/nikicat/hax/tree/fix-overflowing-add-spec):
+  `cargo-hax` + `hax-driver` (cargo, nightly-2025-11-08),
   **OCaml engine** (opam switch, OCaml 5.x; needs `hax-export-json-schemas`
   + `hax-engine-names-extract` from cargo in PATH when building), proof-libs
   from the same checkout. `HAX_HOME` points `verify.sh` at it.
@@ -103,15 +107,12 @@ maintenance.
 
 ## Notes and honest caveats
 
-* `patch_extraction.py` papers over one gap: proof-libs offers no usable
-  `u64::checked_add`/`checked_sub` model, so those calls are redirected to
-  `proofs/fstar/extraction/Verified_ledger_helpers.fst`. At the pinned
-  revision the models are absent
-  ([hax#2120](https://github.com/cryspen/hax/issues/2120)); on current hax
-  `main` they exist but `checked_add` bottoms out in an uninterpreted
-  `overflowing_add_u64` ([hax#2127](https://github.com/cryspen/hax/issues/2127)).
-  With the five-line definition proposed there, the patch and the helper
-  module both go away.
+* **The hax pin is a fork branch, not upstream.** It is upstream `984ca92e`
+  plus [hax#2128](https://github.com/cryspen/hax/pull/2128), which specifies
+  the `overflowing_add` primitive that `u64::checked_add` reduces to. Upstream
+  leaves it uninterpreted, which makes the extracted `mint` and `transfer`
+  unprovable ([hax#2127](https://github.com/cryspen/hax/issues/2127)). The pin
+  moves back to `cryspen/hax` when that PR lands.
 * The `decreases` measure is written `(...).to_int()` so it extracts as a
   `nat`; a machine-int measure is not well-founded in F\*
   ([hax#2121](https://github.com/cryspen/hax/issues/2121)).
@@ -136,6 +137,13 @@ against hax: [#2120](https://github.com/cryspen/hax/issues/2120) and
 [#2122](https://github.com/cryspen/hax/issues/2122) — a proposal for a CI
 lane that must *discharge* extracted contracts instead of snapshotting
 extraction output.
+
+Two of those came back as patches to hax's F\* proof-libs:
+[#2128](https://github.com/cryspen/hax/pull/2128) (specify `overflowing_add`,
+which this repo now pins) and
+[#2129](https://github.com/cryspen/hax/pull/2129) (`mul_overflow` compared
+against `maxint` twice, so `checked_mul` reported overflow on almost every
+product).
 
 ## License
 

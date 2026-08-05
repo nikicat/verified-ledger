@@ -103,10 +103,15 @@ maintenance.
 
 ## Notes and honest caveats
 
-* `patch_extraction.py` papers over one gap at this hax revision:
-  missing `checked_add/sub` u64 models in proof-libs (supplied in
-  `proofs/fstar/extraction/Verified_ledger_helpers.fst`), an
-  upstreamable fix ([hax#2120](https://github.com/cryspen/hax/issues/2120)).
+* `patch_extraction.py` papers over one gap: proof-libs offers no usable
+  `u64::checked_add`/`checked_sub` model, so those calls are redirected to
+  `proofs/fstar/extraction/Verified_ledger_helpers.fst`. At the pinned
+  revision the models are absent
+  ([hax#2120](https://github.com/cryspen/hax/issues/2120)); on current hax
+  `main` they exist but `checked_add` bottoms out in an uninterpreted
+  `overflowing_add_u64` ([hax#2127](https://github.com/cryspen/hax/issues/2127)).
+  With the five-line definition proposed there, the patch and the helper
+  module both go away.
 * The `decreases` measure is written `(...).to_int()` so it extracts as a
   `nat`; a machine-int measure is not well-founded in F\*
   ([hax#2121](https://github.com/cryspen/hax/issues/2121)).
@@ -125,7 +130,7 @@ maintenance.
 ## Upstream
 
 `upstream/` holds the minimized repros and the write-ups filed against hax
-from this work: the two issues above, plus a proposal for a CI lane that
+from this work: the three issues above, plus a proposal for a CI lane that
 must *discharge* extracted contracts instead of snapshotting extraction
 output.
 
